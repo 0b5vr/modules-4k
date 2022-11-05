@@ -1,6 +1,6 @@
 import { GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER, GL_R32F, GL_TEXTURE_2D, GL_TRIANGLE_STRIP } from './gl-constants';
 import { gl } from './gl';
-import { programFbm } from './programs';
+import { programFbm } from './programFbm';
 
 // -- texture --------------------------------------------------------------------------------------
 const SIZE = 1024;
@@ -28,5 +28,3 @@ gl.useProgram( programFbm );
 // -- render ---------------------------------------------------------------------------------------
 gl.viewport( 0, 0, SIZE, SIZE );
 gl.drawArrays( GL_TRIANGLE_STRIP, 0, 4 );
-
-gl.bindFramebuffer( GL_FRAMEBUFFER, null );
