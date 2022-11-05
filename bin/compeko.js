@@ -62,7 +62,7 @@ console.info( 'Compressing the file...' );
     await fs.promises.writeFile( deflatePath, compressed );
   }
 
-  const header = '<svg onload="fetch`#`.then(t=>t.blob()).then(t=>new Response(t.slice(154).stream().pipeThrough(new DecompressionStream`deflate-raw`)).text()).then(eval)">';
+  const header = '<svg onload="fetch`#`.then(t=>t.blob()).then(t=>new Response(t.slice(156).stream().pipeThrough(new DecompressionStream(`deflate-raw`))).text()).then(eval)">';
   const headerBuffer = Buffer.alloc( header.length );
   headerBuffer.write( header );
 
