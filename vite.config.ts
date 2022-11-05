@@ -39,6 +39,8 @@ export default defineConfig( ( { mode } ) => {
         minify: true, // mode === 'prod',
         minifierOptions: {
           preserveExternals: true,
+          aggressiveInlining: true,
+          noSequence: true,
         },
       } ),
     ]

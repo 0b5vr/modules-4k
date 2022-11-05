@@ -13,6 +13,8 @@ export interface ShaderMinifierOptions {
   fieldNames?: string;
   preserveExternals?: boolean;
   preserveAllGlobals?: boolean;
+  noInlining?: boolean;
+  aggressiveInlining?: boolean;
   noRenaming?: boolean;
   noRenamingList?: string[];
   noSequence?: boolean;
@@ -38,6 +40,14 @@ function buildMinifierOptionsString( options: ShaderMinifierOptions ): string {
 
   if ( options.preserveAllGlobals ) {
     str += '--preserve-all-globals ';
+  }
+
+  if ( options.noInlining ) {
+    str += '--no-inlining ';
+  }
+
+  if ( options.aggressiveInlining ) {
+    str += '--aggressive-inlining ';
   }
 
   if ( options.noRenaming ) {
