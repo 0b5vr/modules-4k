@@ -1,6 +1,6 @@
-import { GL_COLOR_ATTACHMENT0, GL_FLOAT, GL_FRAMEBUFFER, GL_RG, GL_RG32F, GL_TEXTURE0, GL_TEXTURE_2D, GL_TRIANGLE_STRIP } from './gl-constants';
+import { GL_COLOR_ATTACHMENT0, GL_FLOAT, GL_FRAMEBUFFER, GL_RG, GL_RG32F, GL_TEXTURE_2D, GL_TRIANGLE_STRIP } from './gl-constants';
+import { analyser } from './analyser';
 import { audio, sampleRate } from './audio';
-import { fbmTexture } from './fbmTexture';
 import { gl } from './gl';
 import { programMusic } from './programMusic';
 
@@ -28,17 +28,17 @@ gl.framebufferTexture2D(
 gl.useProgram( programMusic );
 
 // -- uniforms -------------------------------------------------------------------------------------
-gl.activeTexture( GL_TEXTURE0 );
-gl.bindTexture( GL_TEXTURE_2D, fbmTexture );
+// gl.activeTexture( GL_TEXTURE0 );
+// gl.bindTexture( GL_TEXTURE_2D, fbmTexture );
 
 gl.uniform1f(
   gl.getUniformLocation( programMusic, 'r' ),
   sampleRate,
 );
-gl.uniform1i(
-  gl.getUniformLocation( programMusic, 'f' ),
-  0
-);
+// gl.uniform1i(
+//   gl.getUniformLocation( programMusic, 'f' ),
+//   0
+// );
 
 // -- render ---------------------------------------------------------------------------------------
 gl.viewport( 0, 0, SIZE, SIZE );
@@ -58,8 +58,7 @@ pixels.map( ( v, i ) => (
   channels[ i % 2 ][ ~~( i / 2 ) ] = v
 ) );
 
-let bufferSource = audio.createBufferSource();
-bufferSource.buffer = buffer;
+let bufferSource: AudioBufferSourceNode;
 
 // -- play -----------------------------------------------------------------------------------------
 export let musicBeginTime: number;
@@ -67,10 +66,40 @@ export let musicBeginTime: number;
 export function playMusic(): void {
   audio.resume();
 
-  musicBeginTime = audio.currentTime;
+  musicBeginTime = audio.currentTime + 5.0; // delay 5 sec
 
+  bufferSource = audio.createBufferSource();
+  bufferSource.buffer = buffer;
+
+  bufferSource.connect( analyser );
   bufferSource.connect( audio.destination );
-  bufferSource.start();
+  bufferSource.start( musicBeginTime );
+}
+
+// -- controls -------------------------------------------------------------------------------------
+if ( import.meta.env.DEV ) {
+  const seek = (): void => {
+    bufferSource.stop();
+
+    const offset = audio.currentTime - musicBeginTime;
+
+    bufferSource = audio.createBufferSource();
+    bufferSource.buffer = buffer;
+
+    bufferSource.connect( analyser );
+    bufferSource.connect( audio.destination );
+    bufferSource.start( 0.0, offset );
+  };
+
+  window.addEventListener( 'keydown', ( { key } ) => {
+    if ( key === 'ArrowLeft' ) {
+      musicBeginTime += 1.0;
+      seek();
+    } else if ( key === 'ArrowRight' ) {
+      musicBeginTime -= 1.0;
+      seek();
+    }
+  } );
 }
 
 // -- hot ------------------------------------------------------------------------------------------
@@ -80,17 +109,17 @@ if ( import.meta.hot ) {
     gl.useProgram( programMusic );
 
     // -- uniforms ---------------------------------------------------------------------------------
-    gl.activeTexture( GL_TEXTURE0 );
-    gl.bindTexture( GL_TEXTURE_2D, fbmTexture );
+    // gl.activeTexture( GL_TEXTURE0 );
+    // gl.bindTexture( GL_TEXTURE_2D, fbmTexture );
 
     gl.uniform1f(
       gl.getUniformLocation( programMusic, 'r' ),
       sampleRate,
     );
-    gl.uniform1i(
-      gl.getUniformLocation( programMusic, 'f' ),
-      0
-    );
+    // gl.uniform1i(
+    //   gl.getUniformLocation( programMusic, 'f' ),
+    //   0
+    // );
 
     // -- render -----------------------------------------------------------------------------------
     gl.bindFramebuffer( GL_FRAMEBUFFER, framebuffer );
@@ -102,11 +131,6 @@ if ( import.meta.hot ) {
     gl.readPixels( 0, 0, SIZE, SIZE, GL_RG, GL_FLOAT, pixels );
 
     // -- audio ----------------------------------------------------------------------------------------
-    const buffer = audio.createBuffer( 2, SIZE * SIZE, sampleRate );
-    const channels = [
-      buffer.getChannelData( 0 ),
-      buffer.getChannelData( 1 ),
-    ];
     pixels.map( ( v, i ) => (
       channels[ i % 2 ][ ~~( i / 2 ) ] = v
     ) );
@@ -118,6 +142,7 @@ if ( import.meta.hot ) {
     bufferSource = audio.createBufferSource();
     bufferSource.buffer = buffer;
 
+    bufferSource.connect( analyser );
     bufferSource.connect( audio.destination );
     bufferSource.start( 0.0, offset );
   } );
