@@ -469,5 +469,5 @@ void main(void)
   col=smoothstep(vec3(0,-.1,-.2),vec3(1,1.1,1.2),col);
   col*=smoothstep(0.0,2.0,time);
   col*=smoothstep(64.0,62.0,time);
-  outColor = vec4(col,0);
+  outColor = vec4(col,1);
 }

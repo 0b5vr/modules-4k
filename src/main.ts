@@ -12,6 +12,7 @@ function update(): void {
 }
 
 button.onclick = () => {
+  button.remove();
   canvas.requestFullscreen();
   playMusic();
   update();
